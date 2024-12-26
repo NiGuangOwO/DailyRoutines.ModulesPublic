@@ -12,7 +12,7 @@ using Dalamud.Game.ClientState.Party;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Newtonsoft.Json;
-using Action = Lumina.Excel.GeneratedSheets.Action;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace DailyRoutines.Modules;
 
@@ -200,8 +200,8 @@ public class ASTHelper : DailyModuleBase
             if (member != null)
             {
                 var name         = member.Name.ExtractText();
-                var classJobIcon = member.ClassJob.GameData.ToBitmapFontIcon();
-                var classJobName = member.ClassJob.GameData.Name.ExtractText();
+                var classJobIcon = member.ClassJob.ValueNullable.ToBitmapFontIcon();
+                var classJobName = member.ClassJob.ValueNullable?.Name.ExtractText();
                 
                 var locKey = actionID switch
                 {
@@ -233,8 +233,8 @@ public class ASTHelper : DailyModuleBase
                 if (member != null)
                 {
                     var name         = member.Name.ExtractText();
-                    var classJobIcon = member.ClassJob.GameData.ToBitmapFontIcon();
-                    var classJobName = member.ClassJob.GameData.Name.ExtractText();
+                    var classJobIcon = member.ClassJob.ValueNullable.ToBitmapFontIcon();
+                    var classJobName = member.ClassJob.ValueNullable?.Name.ExtractText();
                     
                     if (ModuleConfig.SendChat)
                         Chat(GetSLoc("ASTHealer-EasyHeal-Message", name, classJobIcon, classJobName));
@@ -297,7 +297,7 @@ public class ASTHelper : DailyModuleBase
                 var bestRecord = FetchBestLogsRecord(zone, member).GetAwaiter().GetResult();
                 if (bestRecord == null) continue;
 
-                switch (member.ClassJob.GameData.Role)
+                switch (member.ClassJob.ValueNullable?.Role)
                 {
                     case 2:
                         // better melee candidate?
@@ -327,7 +327,7 @@ public class ASTHelper : DailyModuleBase
             // melee with higher order
             foreach (var meleeJob in MeleeOrder)
             {
-                var meleeMember = partyList.FirstOrDefault(m => m.ClassJob.GameData.NameEnglish == meleeJob);
+                var meleeMember = partyList.FirstOrDefault(m => m.ClassJob.ValueNullable?.NameEnglish == meleeJob);
                 if (meleeMember != null)
                 {
                     MeleeCandidateId = meleeMember.ObjectId;
@@ -338,7 +338,7 @@ public class ASTHelper : DailyModuleBase
             // range with higher order
             foreach (var rangeJob in RangeOrder)
             {
-                var rangeMember = partyList.FirstOrDefault(m => m.ClassJob.GameData.NameEnglish == rangeJob);
+                var rangeMember = partyList.FirstOrDefault(m => m.ClassJob.ValueNullable?.NameEnglish == rangeJob);
                 if (rangeMember != null)
                 {
                     RangeCandidateId = rangeMember.ObjectId;
@@ -350,13 +350,13 @@ public class ASTHelper : DailyModuleBase
         // melee fallback: if no candidate found, select the first melee or first party member.
         if (MeleeCandidateId == UnspecificTargetId)
         {
-            MeleeCandidateId = partyList.FirstOrDefault(m => m.ClassJob.GameData.Role == 2, partyList.First()).ObjectId;
+            MeleeCandidateId = partyList.FirstOrDefault(m => m.ClassJob.ValueNullable?.Role == 2, partyList.First()).ObjectId;
         }
 
         // range fallback: if no candidate found, select the last range or last party member.
         if (RangeCandidateId == UnspecificTargetId)
         {
-            RangeCandidateId = partyList.LastOrDefault(m => m.ClassJob.GameData.Role == 3, partyList.Last()).ObjectId;
+            RangeCandidateId = partyList.LastOrDefault(m => m.ClassJob.ValueNullable?.Role == 3, partyList.Last()).ObjectId;
         }
 
         TaskHelper.Abort();
@@ -407,7 +407,7 @@ public class ASTHelper : DailyModuleBase
 
     private static string GetRegion()
     {
-        return DService.ClientState.LocalPlayer.CurrentWorld.GameData.DataCenter.Value.Region switch
+        return DService.ClientState.LocalPlayer.CurrentWorld.ValueNullable?.DataCenter.Value.Region switch
         {
             1 => "JP",
             2 => "NA",
@@ -422,9 +422,9 @@ public class ASTHelper : DailyModuleBase
     {
         // get character info
         var charaName  = member.Name;
-        var serverSlug = member.World.GameData.Name;
+        var serverSlug = member.World.ValueNullable?.Name;
         var region     = GetRegion();
-        var job        = member.ClassJob.GameData.NameEnglish;
+        var job        = member.ClassJob.ValueNullable?.NameEnglish;
 
         // fetch record
         try

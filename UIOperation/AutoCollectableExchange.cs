@@ -8,7 +8,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -86,7 +86,7 @@ public unsafe class AutoCollectableExchange : DailyModuleBase
             }
             
             ImGui.SameLine();
-            if (ImGui.Button(LuminaCache.GetRow<InclusionShop>(3801094).Unknown2.ExtractText()))
+            if (ImGui.Button(LuminaCache.GetRow<InclusionShop>(3801094).Unknown0.ExtractText()))
             {
                 TaskHelper.Enqueue(() =>
                 {

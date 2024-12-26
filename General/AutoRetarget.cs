@@ -39,7 +39,7 @@ public class AutoRetarget : DailyModuleBase
         if (ImGui.Button(GetLoc("AutoRetarget-SetToTarget")) && DService.Targets.Target is not null)
         {
             ModuleConfig.DisplayName = DService.Targets.Target is IPlayerCharacter ipc
-                                           ? $"{DService.Targets.Target?.Name}@{((IPlayerCharacter)DService.Targets.Target).HomeWorld.GameData.Name}"
+                                           ? $"{DService.Targets.Target?.Name}@{((IPlayerCharacter)DService.Targets.Target).HomeWorld.ValueNullable?.Name}"
                                            : $"{DService.Targets.Target?.Name}";
             ModuleConfig.Save(this);
         }
@@ -82,7 +82,7 @@ public class AutoRetarget : DailyModuleBase
         foreach (var igo in DService.ObjectTable)
         {
             var objName = igo is IPlayerCharacter ipc
-                              ? $"{igo.Name}@{ipc.HomeWorld.GameData.Name}"
+                              ? $"{igo.Name}@{ipc.HomeWorld.ValueNullable?.Name}"
                               : igo.Name.ToString();
 
             if (ModuleConfig.PrioritizeForlorn && igo is IBattleNpc ibn && (ibn.NameId == 6737 || ibn.NameId == 6738))

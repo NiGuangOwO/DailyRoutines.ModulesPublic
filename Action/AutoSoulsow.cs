@@ -3,7 +3,7 @@ using DailyRoutines.Abstracts;
 using DailyRoutines.Managers;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -35,7 +35,7 @@ public class AutoSoulsow : DailyModuleBase
     // 进入副本
     private void OnZoneChanged(ushort zone)
     {
-        if (LuminaCache.GetRow<TerritoryType>(zone) is not { ContentFinderCondition.Row: > 0 }) return;
+        if (LuminaCache.GetRow<TerritoryType>(zone) is not { ContentFinderCondition.RowId: > 0 }) return;
 
         TaskHelper.Abort();
         TaskHelper.Enqueue(CheckCurrentJob);
@@ -54,7 +54,7 @@ public class AutoSoulsow : DailyModuleBase
     {
         if (BetweenAreas || !IsScreenReady() || OccupiedInEvent) return false;
         if (DService.Condition[ConditionFlag.InCombat] || 
-            DService.ClientState.LocalPlayer is not { ClassJob.Id: 39 } || !IsValidPVEDuty())
+            DService.ClientState.LocalPlayer is not { ClassJob.RowId: 39 } || !IsValidPVEDuty())
         {
             TaskHelper.Abort();
             return true;
@@ -90,7 +90,7 @@ public class AutoSoulsow : DailyModuleBase
         var isPVP = GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
         var contentData = LuminaCache.GetRow<ContentFinderCondition>(GameMain.Instance()->CurrentContentFinderConditionId);
         
-        return !isPVP && (contentData == null || !InvalidContentTypes.Contains(contentData.ContentType.Row));
+        return !isPVP && (contentData.RowId == 0 || !InvalidContentTypes.Contains(contentData.ContentType.RowId));
     }
 
     public override void Uninit()

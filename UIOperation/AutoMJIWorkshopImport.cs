@@ -14,7 +14,7 @@ using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -38,11 +38,11 @@ public unsafe class AutoMJIWorkshopImport : DailyModuleBase
     static AutoMJIWorkshopImport()
     {
         OriginalCraftItemsSheet = LuminaCache.Get<MJICraftworksObject>()
-            .Where(x => x.Item.Row != 0 && x.Item.Value != null)
+            .Where(x => x.Item.RowId != 0 && x.Item.ValueNullable != null)
             .ToDictionary(x => x.RowId, x => x);
         ItemNameMap = OriginalCraftItemsSheet.Values
             .ToDictionary(
-                r => RemoveMJIItemPrefix(r.Item.Value?.Name.ExtractText() ?? ""),
+                r => RemoveMJIItemPrefix(r.Item.Value.Name.ExtractText() ?? ""),
                 r => r,
                 StringComparer.OrdinalIgnoreCase
             );
@@ -201,7 +201,7 @@ public unsafe class AutoMJIWorkshopImport : DailyModuleBase
 
     private static void DrawItemIcon(uint craftObjectId)
     {
-        if (!OriginalCraftItemsSheet.TryGetValue(craftObjectId, out var row) || row.Item.Value == null) return;
+        if (!OriginalCraftItemsSheet.TryGetValue(craftObjectId, out var row) || row.Item.ValueNullable == null) return;
         var iconSize = ImGui.GetTextLineHeight() * 1.5f;
         var iconSizeVec = new Vector2(iconSize, iconSize);
         var craftworkItemIcon = row.Item.Value.Icon;
@@ -211,7 +211,7 @@ public unsafe class AutoMJIWorkshopImport : DailyModuleBase
 
     private static void DrawItemName(uint craftObjectId)
     {
-        if (!OriginalCraftItemsSheet.TryGetValue(craftObjectId, out var row) || row.Item.Value == null) return;
+        if (!OriginalCraftItemsSheet.TryGetValue(craftObjectId, out var row) || row.Item.ValueNullable == null) return;
         ImGui.TextUnformatted(row.Item.Value.Name.ExtractText());
     }
 
@@ -518,8 +518,8 @@ public unsafe class AutoMJIWorkshopImport : DailyModuleBase
                 var craftObject = TryParseItem(item);
                 if (craftObject != null)
                 {
-                    workshop.Add(slot, craftObject.RowId);
-                    slot += craftObject.CraftingTime;
+                    workshop.Add(slot, craftObject.Value.RowId);
+                    slot += craftObject.Value.CraftingTime;
                 }
                 else
                     NotificationWarning($"无法找到物品数据: {item}");

@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using DailyRoutines.Abstracts;
-using DailyRoutines.Helpers;
 using DailyRoutines.Infos;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -38,7 +37,7 @@ public unsafe class AutoCheckItemLevel : DailyModuleBase
 
         if (DService.ClientState.IsPvP) return;
         if (!PresetData.TryGetContent(zone, out var content) || content.PvP ||
-            !ValidContentJobCategories.Contains(content.AcceptClassJobCategory.Row)) return;
+            !ValidContentJobCategories.Contains(content.AcceptClassJobCategory.RowId)) return;
 
         var message = new SeStringBuilder().Append($"{GetLoc("AutoCheckItemLevel-ILRequired")}: ")
                                            .AddUiForeground(content.ItemLevelRequired.ToString(), 34).Build();
@@ -88,7 +87,7 @@ public unsafe class AutoCheckItemLevel : DailyModuleBase
                     {
                         case 0:
                         {
-                            var category = itemData.ClassJobCategory.Row;
+                            var category = itemData.ClassJobCategory.RowId;
                             if (HaveOffHandJobCategories.Contains(category))
                                 itemSlotAmount++;
 
@@ -99,10 +98,10 @@ public unsafe class AutoCheckItemLevel : DailyModuleBase
                             continue;
                     }
 
-                    if (itemData.LevelItem.Row < lowestIL)
-                        lowestIL = itemData.LevelItem.Row;
+                    if (itemData.LevelItem.RowId < lowestIL)
+                        lowestIL = itemData.LevelItem.RowId;
 
-                    totalIL += itemData.LevelItem.Row;
+                    totalIL += itemData.LevelItem.RowId;
                 }
 
                 var avgItemLevel = totalIL / itemSlotAmount;
@@ -112,7 +111,7 @@ public unsafe class AutoCheckItemLevel : DailyModuleBase
                 ssb.AddUiForeground(25);
                 ssb.Add(new PlayerPayload(partyMember.Name.TextValue, partyMember.GameObject.ToBCStruct()->HomeWorld));
                 ssb.AddUiForegroundOff();
-                ssb.Append($" ({partyMember.ClassJob.GameData.Name})");
+                ssb.Append($" ({partyMember.ClassJob.ValueNullable?.Name.ExtractText()})");
 
                 ssb.Append($" {GetLoc("Level")}: ").AddUiForeground(
                     partyMember.Level.ToString(), (ushort)(partyMember.Level >= content.ClassJobLevelSync ? 43 : 17));

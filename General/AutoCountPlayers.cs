@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Text;
 using DailyRoutines.Abstracts;
-using DailyRoutines.Helpers;
 using DailyRoutines.Managers;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui.Dtr;
@@ -11,7 +10,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -89,7 +88,7 @@ public class AutoCountPlayers : DailyModuleBase
                 var message = new SeStringBuilder()
                               .Add(new PlayerPayload(playerAround.Name, playerAround.Character.ToStruct()->HomeWorld))
                               .Append(" (")
-                              .AddIcon(playerAround.Character.ClassJob.GameData.ToBitmapFontIcon())
+                              .AddIcon(playerAround.Character.ClassJob.ValueNullable.ToBitmapFontIcon())
                               .Append($" {playerAround.Job})")
                               .Add(new NewLinePayload())
                               .Append("     ")
@@ -149,7 +148,7 @@ public class AutoCountPlayers : DailyModuleBase
 
             GameObjectID = obj?.GameObjectId ?? 0;
             Name = Character?.Name.TextValue ?? string.Empty;
-            Job = Character?.ClassJob.GameData?.Name?.ExtractText() ?? string.Empty;
+            Job = Character.ClassJob.ValueNullable?.Name.ExtractText() ?? string.Empty;
 
             identifier = $"{Name}_{Job}_{GameObjectID}";
         }

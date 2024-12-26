@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DailyRoutines.Abstracts;
-using DailyRoutines.Helpers;
 using Dalamud.Hooking;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
-using Action = Lumina.Excel.GeneratedSheets.Action;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace DailyRoutines.Modules;
 
@@ -109,13 +108,13 @@ public unsafe class AutoBroadcastActionHitInfo : DailyModuleBase
 
         ImGui.SameLine();
         using (ImRaii.Disabled(SelectedCustomAction == null ||
-                               ModuleConfig.CustomActionName.ContainsKey(SelectedCustomAction.RowId)))
+                               ModuleConfig.CustomActionName.ContainsKey(SelectedCustomAction?.RowId ?? 0)))
         {
             if (ImGuiOm.ButtonIcon("##新增", FontAwesomeIcon.Plus))
             {
                 if (SelectedCustomAction != null)
                 {
-                    ModuleConfig.CustomActionName.TryAdd(SelectedCustomAction.RowId, string.Empty);
+                    ModuleConfig.CustomActionName.TryAdd(SelectedCustomAction?.RowId ?? 0, string.Empty);
                     ModuleConfig.Save(this);
                 }
             }
@@ -191,7 +190,7 @@ public unsafe class AutoBroadcastActionHitInfo : DailyModuleBase
 
             var actionID   = effectHeader->ActionId;
             var actionData = LuminaCache.GetRow<Action>(actionID);
-            if (actionData.ActionCategory.Row == 1) return; // 自动攻击
+            if (actionData.ActionCategory.RowId == 1) return; // 自动攻击
 
             switch (ModuleConfig.WorkMode)
             {

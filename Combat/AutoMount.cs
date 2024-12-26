@@ -6,7 +6,7 @@ using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -53,7 +53,7 @@ public unsafe class AutoMount : DailyModuleBase
         ImGui.SetNextItemWidth(250f * GlobalFontScale);
         if (MountSelectCombo(ref SelectedMountRow, ref MountSearchInput))
         {
-            ModuleConfig.SelectedMount = SelectedMountRow.RowId;
+            ModuleConfig.SelectedMount = SelectedMountRow?.RowId ?? 0;
             SaveConfig(ModuleConfig);
         }
 

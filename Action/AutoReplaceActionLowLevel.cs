@@ -6,7 +6,7 @@ using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -85,7 +85,7 @@ public unsafe class AutoReplaceActionLowLevel : DailyModuleBase
         {
             var action0Data = LuminaCache.GetRow<Action>(action0);
             var action1Data = LuminaCache.GetRow<Action>(action1);
-            if (action0Data == null || action1Data == null) continue;
+            if (action0Data.RowId == 0 || action1Data.RowId == 0) continue;
 
             var action0Icon = DService.Texture.GetFromGameIcon(new(action0Data.Icon)).GetWrapOrDefault();
             var action1Icon = DService.Texture.GetFromGameIcon(new(action1Data.Icon)).GetWrapOrDefault();

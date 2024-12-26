@@ -13,8 +13,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -119,7 +118,7 @@ public unsafe class AutoLogin : DailyModuleBase
                 if (ImGuiOm.ButtonIconWithTextVertical(FontAwesomeIcon.Plus, Lang.Get("Add")))
                 {
                     if (SelectedCharaIndex is < 0 or > 7 || SelectedWorld == null) return;
-                    var info = new LoginInfo(SelectedWorld.RowId, SelectedCharaIndex);
+                    var info = new LoginInfo(SelectedWorld?.RowId ?? 0, SelectedCharaIndex);
                     if (!ModuleConfig.LoginInfos.Contains(info))
                     {
                         ModuleConfig.LoginInfos.Add(info);
@@ -239,7 +238,7 @@ public unsafe class AutoLogin : DailyModuleBase
             case 1:
                 if (!int.TryParse(args, out var charaIndex0) || charaIndex0 < 0 || charaIndex0 > 8) return;
 
-                ManualWorldID = (ushort)DService.ClientState.LocalPlayer.HomeWorld.Id;
+                ManualWorldID = (ushort)DService.ClientState.LocalPlayer.HomeWorld.RowId;
                 ManualCharaIndex = charaIndex0;
                 break;
             case 2:

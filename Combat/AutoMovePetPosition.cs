@@ -9,7 +9,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -28,7 +28,7 @@ public class AutoMovePetPosition : DailyModuleBase
     static AutoMovePetPosition()
     {
         ValidContents = PresetData.Contents
-                                  .Where(pair => pair.Value.ContentMemberType.Row == 3) // 只要 8 人本
+                                  .Where(pair => pair.Value.ContentMemberType.RowId == 3) // 只要 8 人本
                                   .ToDictionary(pair => pair.Key, pair => pair.Value);
     }
 
@@ -132,13 +132,13 @@ public class AutoMovePetPosition : DailyModuleBase
 
                 // 1) ZoneID (区域ID)
                 var editingZoneID  = schedule.ZoneID;
-                var editingContent = LuminaCache.GetRow<TerritoryType>(editingZoneID)?.ContentFinderCondition?.Value;
+                var editingContent = LuminaCache.GetRow<TerritoryType>(editingZoneID).ContentFinderCondition.ValueNullable;
 
                 ImGui.TableNextColumn();
                 ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
                 if (ContentSelectCombo(ref editingContent, ref ContentSearchInput, ValidContents))
                 {
-                    editingZoneID = editingContent.TerritoryType.Row;
+                    editingZoneID = editingContent?.TerritoryType.RowId ?? 0;
 
                     var scheduleCopy = schedule.Copy();
                     scheduleCopy.ZoneID = editingZoneID;
@@ -350,7 +350,7 @@ public class AutoMovePetPosition : DailyModuleBase
 
         if (DService.ClientState.LocalPlayer is { } localPlayer)
         {
-            if (!ValidJobs.Contains(localPlayer.ClassJob.Id)) return;
+            if (!ValidJobs.Contains(localPlayer.ClassJob.RowId)) return;
             
             // 只选启用的
             var enabledSchedules     = schedulesForThisDuty.Where(x => x.Enabled).ToList();
@@ -387,7 +387,7 @@ public class AutoMovePetPosition : DailyModuleBase
     {
         if (!CheckIsEightPlayerDuty()) return;
         if (DService.ClientState.LocalPlayer is not { } player) return;
-        if (!ValidJobs.Contains(player.ClassJob.Id)) return;
+        if (!ValidJobs.Contains(player.ClassJob.RowId)) return;
         
         var pet = CharacterManager.Instance()->LookupPetByOwnerObject(player.ToBCStruct());
         if (pet == null) return;
@@ -411,7 +411,7 @@ public class AutoMovePetPosition : DailyModuleBase
         var contentData = zoneData.ContentFinderCondition.Value;
         if (contentData.RowId == 0) return false;
 
-        return contentData.ContentMemberType.Row == 3;
+        return contentData.ContentMemberType.RowId == 3;
     }
 
     public override void Uninit()

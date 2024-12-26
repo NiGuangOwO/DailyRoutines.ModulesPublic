@@ -5,7 +5,7 @@ using System.Numerics;
 using DailyRoutines.Abstracts;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Action = System.Action;
 using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 

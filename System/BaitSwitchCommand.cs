@@ -9,7 +9,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using TinyPinyin;
 
 namespace DailyRoutines.Modules;

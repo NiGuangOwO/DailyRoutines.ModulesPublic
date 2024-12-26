@@ -4,7 +4,6 @@ using System.Linq;
 using DailyRoutines.Abstracts;
 using DailyRoutines.Helpers;
 using DailyRoutines.Infos;
-using DailyRoutines.Managers;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
@@ -14,8 +13,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -96,7 +94,7 @@ public unsafe class AutoPlayerCommend : DailyModuleBase
                 if (ImGuiOm.ButtonIconWithTextVertical(FontAwesomeIcon.Plus, GetLoc("Add")))
                 {
                     if (SelectedWorld == null || string.IsNullOrWhiteSpace(PlayerNameInput)) return;
-                    var info = new PlayerInfo(PlayerNameInput, SelectedWorld.RowId);
+                    var info = new PlayerInfo(PlayerNameInput, SelectedWorld?.RowId ?? 0);
                     if (ModuleConfig.BlacklistPlayers.Add(info))
                         SaveConfig(ModuleConfig);
                 }
@@ -172,22 +170,22 @@ public unsafe class AutoPlayerCommend : DailyModuleBase
         TaskHelper.Abort();
 
         var localPlayer = DService.ClientState.LocalPlayer;
-        var localPlayerInfo = new PlayerInfo(localPlayer.Name.ExtractText(), localPlayer.HomeWorld.GameData.RowId)
+        var localPlayerInfo = new PlayerInfo(localPlayer.Name.ExtractText(), localPlayer.HomeWorld.Value.RowId)
         {
-            JobID = localPlayer.ClassJob.GameData.RowId,
-            Role = GetCharacterJobRole(localPlayer.ClassJob.GameData.Role),
+            JobID = localPlayer.ClassJob.Value.RowId,
+            Role = GetCharacterJobRole(localPlayer.ClassJob.Value.Role),
         };
 
-        var allies = DService.PartyList.Select(x => new PlayerInfo(x.Name.ExtractText(), x.World.GameData.RowId)
+        var allies = DService.PartyList.Select(x => new PlayerInfo(x.Name.ExtractText(), x.World.Value.RowId)
                             {
-                                Role = GetCharacterJobRole(x.ClassJob.GameData.Role),
-                                JobID = x.ClassJob.GameData.RowId,
+                                Role  = GetCharacterJobRole(x.ClassJob.Value.Role),
+                                JobID = x.ClassJob.Value.RowId,
                             })
                             .Where(x => x != localPlayerInfo && !ModuleConfig.BlacklistPlayers.Contains(x)).ToList();
 
         if (allies.Count == 0) return;
         var playersToCommend = allies
-                               .OrderByDescending(player => localPlayer.ClassJob.Id == player.JobID || 
+                               .OrderByDescending(player => localPlayer.ClassJob.RowId == player.JobID || 
                                                             player.Role == localPlayerInfo.Role)
                                .ThenByDescending(player => localPlayerInfo.Role switch
                                {
@@ -218,7 +216,7 @@ public unsafe class AutoPlayerCommend : DailyModuleBase
 
                             var job = LuminaCache.GetRow<ClassJob>(player.JobID);
                             var message = GetSLoc("AutoPlayerCommend-NoticeMessage",
-                                                  job.ToBitmapFontIcon(), job.Name.ExtractText(),
+                                                  ((ClassJob?)job).ToBitmapFontIcon(), job.Name.ExtractText(),
                                                   player.PlayerName);
                             Chat(message);
                             return;
@@ -264,7 +262,7 @@ public unsafe class AutoPlayerCommend : DailyModuleBase
             var worldName = MemoryHelper.ReadStringNullTerminated(stringArray[200 + num]);
             var world = PresetData.Worlds.Values.FirstOrDefault(
                 x => x.Name.ExtractText().Contains(worldName, StringComparison.OrdinalIgnoreCase));
-            if (world == null || string.IsNullOrWhiteSpace(playerName)) continue;
+            if (world.RowId == 0 || string.IsNullOrWhiteSpace(playerName)) continue;
 
             var player = new PlayerInfo(playerName, world.RowId);
             list.Add(player);
@@ -342,18 +340,18 @@ public unsafe class AutoPlayerCommend : DailyModuleBase
         {
             if (args.Target is not MenuTargetDefault target) return;
             if (target.TargetCharacter          == null && string.IsNullOrWhiteSpace(target.TargetName) &&
-                target.TargetHomeWorld.GameData == null) return;
+                target.TargetHomeWorld.ValueNullable == null) return;
             
-            var playerName = target.TargetCharacter != null ? target.TargetCharacter.Name : target.TargetName;
-            var playerWorld = target.TargetCharacter != null ? target.TargetCharacter.HomeWorld : target.TargetHomeWorld;
+            var playerName  = target.TargetCharacter != null ? target.TargetCharacter.Name : target.TargetName;
+            var playerWorld = target.TargetCharacter?.HomeWorld ?? target.TargetHomeWorld;
             
-            var info   = new PlayerInfo(playerName, playerWorld.Id);
+            var info   = new PlayerInfo(playerName, playerWorld.RowId);
             NotificationInfo(
                 ModuleConfig.BlacklistPlayers.Add(info)
                     ? GetLoc("AutoPlayerCommend-AddToBlacklistSuccess", 
-                                           playerName, playerWorld.GameData.Name.ExtractText())
+                                           playerName, playerWorld.Value.Name.ExtractText())
                     : GetLoc("AutoPlayerCommend-AddToBlacklistFail", 
-                                           playerName, playerWorld.GameData.Name.ExtractText()));
+                                           playerName, playerWorld.Value.Name.ExtractText()));
         }
     }
 }

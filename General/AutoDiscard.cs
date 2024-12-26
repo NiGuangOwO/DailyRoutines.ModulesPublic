@@ -9,7 +9,7 @@ using Dalamud.Game.Command;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -52,7 +52,7 @@ public unsafe class AutoDiscard : DailyModuleBase
 
         var itemNames = LuminaCache.Get<Item>()
                                  .Where(x => !string.IsNullOrEmpty(x.Name.ExtractText()) &&
-                                             x.ItemSortCategory.Row != 3 && x.ItemSortCategory.Row != 4)
+                                             x.ItemSortCategory.RowId != 3 && x.ItemSortCategory.RowId != 4)
                                  .GroupBy(x => x.Name.ExtractText())
                                  .Select(x => x.First())
                                  .ToList();
@@ -428,7 +428,7 @@ public unsafe class AutoDiscard : DailyModuleBase
                         foreach (var item in group.Items.TakeLast(15))
                         {
                             var itemData = LuminaCache.GetRow<Item>(item);
-                            if (itemData == null) continue;
+                            if (itemData.RowId == 0) continue;
 
                             var itemIcon = DService.Texture.GetFromGameIcon(new(itemData.Icon)).GetWrapOrDefault();
                             if (itemIcon == null) continue;
@@ -461,7 +461,7 @@ public unsafe class AutoDiscard : DailyModuleBase
                 foreach (var item in group.Items)
                 {
                     var specificItem = LuminaCache.GetRow<Item>(item);
-                    if (specificItem == null) continue;
+                    if (specificItem.RowId == 0) continue;
 
                     var specificItemIcon = DService.Texture.GetFromGameIcon(new(specificItem.Icon)).GetWrapOrDefault();
                     if (specificItemIcon == null) continue;

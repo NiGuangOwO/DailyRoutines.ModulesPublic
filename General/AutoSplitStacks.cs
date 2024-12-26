@@ -14,7 +14,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -106,7 +106,7 @@ public unsafe class AutoSplitStacks : DailyModuleBase
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(250f * GlobalFontScale);
                     using (var combo = ImRaii.Combo("###ItemSelectCombo",
-                                                    SelectedItem == null ? "" : SelectedItem.Name.ExtractText(),
+                                                    SelectedItem == null ? "" : SelectedItem?.Name.ExtractText(),
                                ImGuiComboFlags.HeightLarge))
                     {
                         if (combo)
@@ -121,7 +121,7 @@ public unsafe class AutoSplitStacks : DailyModuleBase
                             {
                                 var icon = ImageHelper.GetIcon(item.Icon).ImGuiHandle;
                                 if (ImGuiOm.SelectableImageWithText(icon, new(ImGui.GetTextLineHeightWithSpacing()),
-                                                                    item.Name.ExtractText(), item == SelectedItem))
+                                                                    item.Name.ExtractText(), item.RowId == SelectedItem?.RowId))
                                     SelectedItem = item;
                             }
                         }
@@ -144,7 +144,7 @@ public unsafe class AutoSplitStacks : DailyModuleBase
                     if (ImGuiOm.ButtonIconWithTextVertical(FontAwesomeIcon.Plus, Lang.Get("Add"),
                                                            buttonSize: new(ImGui.CalcTextSize("三个字").X, itemSize.Y)))
                     {
-                        var newGroup = new SplitGroup(SelectedItem.RowId, SplitAmountInput);
+                        var newGroup = new SplitGroup(SelectedItem?.RowId ?? 0, SplitAmountInput);
                         if (!ModuleConfig.SplitGroups.Contains(newGroup))
                         {
                             ModuleConfig.SplitGroups.Add(newGroup);
@@ -275,7 +275,7 @@ public unsafe class AutoSplitStacks : DailyModuleBase
                               .Where(x => x.Name.ExtractText().Contains(args, StringComparison.OrdinalIgnoreCase))
                               .OrderBy(x => x.Name.ExtractText().Length)
                               .FirstOrDefault();
-        if (item != null)
+        if (item.RowId != 0)
         {
             var group = ModuleConfig.SplitGroups.FirstOrDefault(x => x.ItemID == item.RowId);
             if (group == null) return;

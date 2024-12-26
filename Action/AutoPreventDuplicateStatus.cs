@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DailyRoutines.Abstracts;
-using DailyRoutines.Helpers;
 using DailyRoutines.Infos;
 using DailyRoutines.Managers;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -10,7 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -268,7 +267,7 @@ public unsafe class AutoPreventDuplicateStatus : DailyModuleBase
         if (ActionManager.Instance()->GetActionStatus(actionType, adjustedActionID) != 0) return;
 
         var actionData = LuminaCache.GetRow<Action>(adjustedActionID);
-        if (actionData == null) return;
+        if (actionData.RowId == 0) return;
 
         var canTargetSelf = actionData.CanTargetSelf;
         // 雪仇

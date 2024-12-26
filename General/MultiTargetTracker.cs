@@ -12,7 +12,7 @@ using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -222,7 +222,7 @@ public class MultiTargetTracker : DailyModuleBase
             var chara = ipc.ToStruct();
             ContentID = chara->ContentId;
             Name      = ipc.Name.TextValue;
-            WorldName = ipc.HomeWorld.GameData.Name.ExtractText();
+            WorldName = ipc.HomeWorld.ValueNullable?.Name.ExtractText();
         }
 
         public TrackPlayer() { }
@@ -260,7 +260,7 @@ public class MultiTargetTracker : DailyModuleBase
             if (args.Target is not MenuTargetDefault target) return;
 
             var data = new TrackPlayer(target.TargetContentId,
-                                       target.TargetName, target.TargetHomeWorld.GameData.Name.ExtractText());
+                                       target.TargetName, target.TargetHomeWorld.ValueNullable?.Name.ExtractText());
             if (!TempTrackedPlayers.Add(data))
             {
                 TempTrackedPlayers.Remove(data);

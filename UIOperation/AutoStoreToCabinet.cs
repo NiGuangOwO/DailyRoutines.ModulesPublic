@@ -14,7 +14,7 @@ using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -46,8 +46,8 @@ public class AutoStoreToCabinet : DailyModuleBase
     public override void Init()
     {
         CabinetItems ??= LuminaCache.Get<Cabinet>()
-                                    .Where(x => x.Item.Row > 0)
-                                    .ToDictionary(x => x.Item.Row, x => x.RowId);
+                                    .Where(x => x.Item.RowId > 0)
+                                    .ToDictionary(x => x.Item.RowId, x => x.RowId);
 
         CancelSource ??= new();
         Overlay ??= new Overlay(this);

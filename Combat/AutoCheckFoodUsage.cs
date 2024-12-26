@@ -11,7 +11,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -219,7 +219,7 @@ public class AutoCheckFoodUsage : DailyModuleBase
                                               var icon = ImageHelper.GetIcon(x.Icon, SelectItemIsHQ);
 
                                               if (ImGuiOm.SelectableImageWithText(icon.ImGuiHandle, ScaledVector2(20f),
-                                                                                  x.Name, x.RowId == SelectedItem,
+                                                                                  x.Name.ExtractText(), x.RowId == SelectedItem,
                                                                                   ImGuiSelectableFlags.DontClosePopups))
                                               {
                                                   SelectedItem = SelectedItem == x.RowId ? 0 : x.RowId;
@@ -320,13 +320,13 @@ public class AutoCheckFoodUsage : DailyModuleBase
                                          },
                                          x => () =>
                                          {
-                                             var contentName = x.ContentFinderCondition?.Value?.Name?.ExtractText() ?? "";
+                                             var contentName = x.ContentFinderCondition.ValueNullable?.Name.ExtractText() ?? "";
                                              ImGui.Text(contentName);
                                          }
                                      ],
                                      [
                                          x => x.ExtractPlaceName(),
-                                         x => x.ContentFinderCondition?.Value?.Name?.ExtractText() ?? ""
+                                         x => x.ContentFinderCondition.ValueNullable?.Name.ExtractText() ?? ""
                                      ], true))
                 {
                     preset.Zones = zones;
@@ -490,7 +490,7 @@ public class AutoCheckFoodUsage : DailyModuleBase
                            .Where(x => x.Enabled && 
                                        (zone == -1 || x.Zones.Count == 0 || x.Zones.Contains((uint)zone)) &&
                                        (x.ClassJobs.Count == 0 || 
-                                        x.ClassJobs.Contains(DService.ClientState.LocalPlayer.ClassJob.Id)) &&
+                                        x.ClassJobs.Contains(DService.ClientState.LocalPlayer.ClassJob.RowId)) &&
                                        instance->GetInventoryItemCount(x.ItemID, x.IsHQ) > 0)
                            .OrderByDescending(x => x.Zones.Contains((uint)zone))
                            .ToList();
@@ -536,5 +536,6 @@ public class AutoCheckFoodUsage : DailyModuleBase
         条件变更时,
     }
 
-    private static uint ToFoodRowID(uint id) => LuminaCache.GetRow<ItemFood>(LuminaCache.GetRow<Item>(id)?.ItemAction?.Value?.Data[1] ?? 0)?.RowId ?? 0;
+    private static uint ToFoodRowID(uint id) =>
+        LuminaCache.GetRow<ItemFood>(LuminaCache.GetRow<Item>(id).ItemAction.Value.Data[1]).RowId;
 }

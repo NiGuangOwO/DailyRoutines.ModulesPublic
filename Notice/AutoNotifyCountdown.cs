@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using DailyRoutines.Abstracts;
-using DailyRoutines.Helpers;
-using DailyRoutines.Managers;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
-using PayloadType = Lumina.Text.Payloads.PayloadType;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -30,9 +28,10 @@ public class AutoNotifyCountdown : DailyModuleBase
         AddConfig("OnlyNotifyWhenBackground", true);
         ConfigOnlyNotifyWhenBackground = GetConfig<bool>("OnlyNotifyWhenBackground");
 
-        Countdown ??= LuminaCache.GetRow<LogMessage>(5255).Text.Payloads
-                                 .Where(x => x.PayloadType == PayloadType.Text)
-                                 .Select(text => text.RawString).ToList();
+        Countdown ??= LuminaCache.GetRow<LogMessage>(5255).Text.ToDalamudString().Payloads
+                                 .Where(x => x.Type == PayloadType.RawText)
+                                 .OfType<TextPayload>()
+                                 .Select(text => text.ToString()).ToList();
 
         DService.Chat.ChatMessage += OnChatMessage;
     }

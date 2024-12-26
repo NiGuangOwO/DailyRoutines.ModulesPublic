@@ -3,7 +3,7 @@ using DailyRoutines.Abstracts;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -122,15 +122,15 @@ public class AutoSortItems : DailyModuleBase
     private static unsafe bool IsInNormalMap()
     {
         var currentMapData = LuminaCache.GetRow<Map>(DService.ClientState.MapId);
-        if (currentMapData == null) return false;
-        if (currentMapData.TerritoryType.Row == 0 ||
-            currentMapData.TerritoryType.Value.ContentFinderCondition.Row != 0) return false;
+        if (currentMapData.RowId == 0) return false;
+        if (currentMapData.TerritoryType.RowId == 0 ||
+            currentMapData.TerritoryType.Value.ContentFinderCondition.RowId != 0) return false;
 
         var isPVP = GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
         var contentData =
             LuminaCache.GetRow<ContentFinderCondition>(GameMain.Instance()->CurrentContentFinderConditionId);
 
-        return !isPVP && (contentData == null || !InvalidContentTypes.Contains(contentData.ContentType.Row));
+        return !isPVP && (contentData.RowId == 0 || !InvalidContentTypes.Contains(contentData.ContentType.RowId));
     }
 
     private void SendSortCommand()

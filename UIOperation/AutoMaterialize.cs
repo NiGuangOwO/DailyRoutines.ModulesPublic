@@ -12,7 +12,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace DailyRoutines.Modules;
 
@@ -129,7 +129,7 @@ public unsafe class AutoMaterialize : DailyModuleBase
                 if (slot->Spiritbond != 10_000) continue;
 
                 var itemData = LuminaCache.GetRow<Item>(slot->ItemId);
-                if (itemData == null) continue;
+                if (itemData.RowId == 0) continue;
 
                 var itemName = itemData.Name.ExtractText();
                 TaskHelper.Enqueue(() => ExtractMateria(type, (uint)i) == 0, $"开始精炼单件装备 {itemName}({slot->ItemId})");

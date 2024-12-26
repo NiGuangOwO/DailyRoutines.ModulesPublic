@@ -14,7 +14,7 @@ using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using GrandCompany = FFXIVClientStructs.FFXIV.Client.UI.Agent.GrandCompany;
 
 namespace DailyRoutines.Modules;
@@ -220,7 +220,7 @@ public unsafe class AutoExpertDelivery : DailyModuleBase
             return true;
         }
         var companySeals = InventoryManager.Instance()->GetCompanySeals(grandCompany);
-        var capAmount = LuminaCache.GetRow<GrandCompanyRank>(PlayerState.Instance()->GetGrandCompanyRank())?.MaxSeals ?? 0;
+        var capAmount = LuminaCache.GetRow<GrandCompanyRank>(PlayerState.Instance()->GetGrandCompanyRank()).MaxSeals;
 
         var firstItemAmount = GrandCompanySupplyList->AtkValues[265].UInt;
         if (firstItemAmount + companySeals > capAmount)
